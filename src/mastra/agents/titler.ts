@@ -3,7 +3,7 @@ import { Agent } from '@mastra/core/agent';
 export const titlerAgent = new Agent({
   id: 'titler',
   name: 'Titler',
-  model: 'anthropic/claude-haiku-4.5',
+  model: 'anthropic/claude-haiku-4-5',
   instructions: `Sei un generatore di titoli per conversazioni di un'app CRM per procacciatori italiana.
 
 Riceverai il primo messaggio di una nuova conversazione. Il tuo compito è generare un titolo BREVE e DESCRITTIVO che riassuma l'intento dell'utente.

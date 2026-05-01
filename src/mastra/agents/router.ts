@@ -3,7 +3,7 @@ import { Agent } from '@mastra/core/agent';
 export const routerAgent = new Agent({
   id: 'router',
   name: 'Router',
-  model: 'anthropic/claude-haiku-4.5',
+  model: 'anthropic/claude-haiku-4-5',
   instructions: `Sei un classificatore per un CRM di procacciatori. Rispondi con UNA SOLA parola.
 
 REGOLE:
