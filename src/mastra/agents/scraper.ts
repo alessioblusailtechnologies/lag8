@@ -6,7 +6,7 @@ import { cercaWeb, estraiContenuto } from '../tools/web';
 export const scraperAgent = new Agent({
   id: 'scraper',
   name: 'Agente Scraper',
-  model: 'anthropic/claude-sonnet-4-6',
+  model: 'anthropic/claude-opus-4-7',
   tools: {
     cercaScraper,
     avviaScraper,

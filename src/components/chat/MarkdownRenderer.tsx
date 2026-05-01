@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
@@ -36,10 +37,12 @@ const components: Components = {
   hr: () => <hr className={styles.hr} />,
 };
 
-export default function MarkdownRenderer({ content }: { content: string }) {
+function MarkdownRenderer({ content }: { content: string }) {
   return (
     <div className={styles.markdown}>
       <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} components={components}>{content}</ReactMarkdown>
     </div>
   );
 }
+
+export default memo(MarkdownRenderer);

@@ -83,6 +83,7 @@ export async function POST(req: NextRequest) {
       try {
         const result = await agent.stream(messages, {
           maxSteps: 10,
+          modelSettings: { temperature: undefined },
         });
 
         let fullText = '';
@@ -141,7 +142,13 @@ export async function POST(req: NextRequest) {
         controller.close();
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Errore durante la generazione della risposta';
-        send({ type: 'error', content: errorMsg });
+        let title: string | null = null;
+        if (titlerPromise) {
+          try {
+            title = await titlerPromise;
+          } catch {}
+        }
+        send({ type: 'error', content: errorMsg, conversation_id: convId, title });
         controller.close();
       }
     },

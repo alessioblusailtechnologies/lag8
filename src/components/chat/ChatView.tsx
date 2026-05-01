@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo, useCallback, KeyboardEvent, ChangeEvent } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback, memo, KeyboardEvent, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
@@ -64,6 +64,7 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   created_at: string;
+  error?: string;
 }
 
 const TOOL_LABELS: Record<string, string> = {
@@ -98,6 +99,40 @@ function randomIdlePhrase(exclude?: string | null): string {
   const pool = exclude ? IDLE_PHRASES.filter((p) => p !== exclude) : IDLE_PHRASES;
   return pool[Math.floor(Math.random() * pool.length)];
 }
+
+interface ChatBubbleProps {
+  msg: ChatMessage;
+  isActiveStream: boolean;
+  thinkingStatus: string | null;
+}
+
+const ChatBubble = memo(function ChatBubble({ msg, isActiveStream, thinkingStatus }: ChatBubbleProps) {
+  return (
+    <div className={`${styles.chatBubble} ${styles[msg.role]}`}>
+      {msg.role === 'user' ? (
+        <div className={`${styles.chatBubbleContent} ${styles.chatBubbleContentUser}`}>
+          {msg.content}
+        </div>
+      ) : (
+        <div className={styles.chatBubbleContent}>
+          {msg.content ? <MarkdownRenderer content={msg.content} /> : null}
+          {msg.error && (
+            <div className={styles.errorBlock} role="alert">
+              <span className={styles.errorBlockTitle}>Errore</span>
+              <span className={styles.errorBlockMessage}>{msg.error}</span>
+            </div>
+          )}
+          {isActiveStream && thinkingStatus && (
+            <div className={styles.thinkingStatus}>
+              <span className={styles.thinkingDot} />
+              <span className={styles.thinkingText}>{thinkingStatus}</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+});
 
 interface ChatViewProps {
   initialConversationId?: string;
@@ -184,6 +219,7 @@ export default function ChatView({ initialConversationId }: ChatViewProps) {
     let displayedText = '';
     let streamDone = false;
     let doneConvId: string | null = null;
+    let errorMessage: string | null = null;
 
     const QUIET_MS = 700;
     let idleReturnTimer: ReturnType<typeof setTimeout> | null = null;
@@ -240,7 +276,11 @@ export default function ChatView({ initialConversationId }: ChatViewProps) {
         cancelIdleReturn();
         cancelAnimationFrame(rafId);
         setChatMessages((prev) =>
-          prev.map((m) => (m.id === botId ? { ...m, content: receivedText } : m)),
+          prev.map((m) =>
+            m.id === botId
+              ? { ...m, content: receivedText, error: errorMessage ?? undefined }
+              : m,
+          ),
         );
         setStreaming(false);
         setSending(false);
@@ -303,7 +343,8 @@ export default function ChatView({ initialConversationId }: ChatViewProps) {
               } else if (data.type === 'done' && data.conversation_id) {
                 doneConvId = data.conversation_id;
               } else if (data.type === 'error') {
-                receivedText += `\n\nErrore: ${data.content}`;
+                errorMessage = data.content || 'Errore sconosciuto';
+                if (data.conversation_id) doneConvId = data.conversation_id;
               }
             } catch {
               // skip malformed
@@ -312,7 +353,7 @@ export default function ChatView({ initialConversationId }: ChatViewProps) {
         }
       }
     } catch {
-      receivedText = receivedText || 'Mi dispiace, si è verificato un errore. Riprova.';
+      errorMessage = errorMessage || 'Errore di rete. Riprova.';
     } finally {
       streamDone = true;
     }
@@ -372,23 +413,12 @@ export default function ChatView({ initialConversationId }: ChatViewProps) {
               {chatMessages.map((msg, idx) => {
                 const isActiveStream = streaming && msg.role === 'assistant' && idx === chatMessages.length - 1;
                 return (
-                  <div key={msg.id} className={`${styles.chatBubble} ${styles[msg.role]}`}>
-                    {msg.role === 'user' ? (
-                      <div className={`${styles.chatBubbleContent} ${styles.chatBubbleContentUser}`}>
-                        {msg.content}
-                      </div>
-                    ) : (
-                      <div className={styles.chatBubbleContent}>
-                        {msg.content ? <MarkdownRenderer content={msg.content} /> : null}
-                        {isActiveStream && thinkingStatus && (
-                          <div className={styles.thinkingStatus}>
-                            <span className={styles.thinkingDot} />
-                            <span className={styles.thinkingText}>{thinkingStatus}</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                  <ChatBubble
+                    key={msg.id}
+                    msg={msg}
+                    isActiveStream={isActiveStream}
+                    thinkingStatus={isActiveStream ? thinkingStatus : null}
+                  />
                 );
               })}
               <div ref={messagesEndRef} />

@@ -13,7 +13,7 @@ import { cercaWeb, estraiContenuto } from '../tools/web';
 export const crmAgent = new Agent({
   id: 'crm',
   name: 'Agente CRM',
-  model: 'anthropic/claude-sonnet-4-6',
+  model: 'anthropic/claude-opus-4-7',
   tools: {
     cercaLead,
     contaLead,

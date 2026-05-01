@@ -2,6 +2,10 @@
   font-size: 14px;
   line-height: 1.6;
   color: inherit;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 
   > *:last-child { margin-bottom: 0 !important; }
   > *:first-child { margin-top: 0 !important; }
@@ -22,6 +26,8 @@
   border-radius: 4px;
   font-size: 13px;
   font-family: 'JetBrains Mono', monospace;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .pre {
@@ -30,11 +36,14 @@
   padding: 12px 14px;
   margin: 10px 0;
   overflow-x: auto;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .codeBlock {
   font-size: 13px;
   font-family: 'JetBrains Mono', monospace;
+  white-space: pre;
 }
 
 .blockquote {
