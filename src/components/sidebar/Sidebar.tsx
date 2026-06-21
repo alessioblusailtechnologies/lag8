@@ -31,7 +31,20 @@ export default function Sidebar() {
   const [convOpen, setConvOpen] = useState(true);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Toggle the off-canvas drawer from the topbar hamburger (mobile only)
+  useEffect(() => {
+    const handler = () => setMobileOpen((v) => !v);
+    window.addEventListener('lag8:toggle-sidebar', handler);
+    return () => window.removeEventListener('lag8:toggle-sidebar', handler);
+  }, []);
+
+  // Close the drawer whenever the route changes (e.g. user tapped a nav link)
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     if (!openMenuId) return;
@@ -78,7 +91,13 @@ export default function Sidebar() {
   const isAssistantActive = pathname === '/assistente' || pathname.startsWith('/assistente/');
 
   return (
-    <aside className={styles.sidebar}>
+    <>
+      <div
+        className={`${styles.overlay} ${mobileOpen ? styles.overlayVisible : ''}`}
+        onClick={() => setMobileOpen(false)}
+        aria-hidden="true"
+      />
+      <aside className={`${styles.sidebar} ${mobileOpen ? styles.mobileOpen : ''}`}>
       <div className={styles.sidebarLogo}>
         <span className={styles.logoName}>
           lag8<span className={styles.logoAi}>.ai</span>
@@ -212,6 +231,7 @@ export default function Sidebar() {
           </button>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

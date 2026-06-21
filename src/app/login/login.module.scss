@@ -16,6 +16,16 @@
   box-shadow: 0 4px 40px rgba(2, 43, 58, 0.12);
 }
 
+@media (max-width: 480px) {
+  .loginPage {
+    padding: 16px;
+  }
+
+  .loginCard {
+    padding: 32px 22px;
+  }
+}
+
 .loginLogo {
   display: flex;
   align-items: center;

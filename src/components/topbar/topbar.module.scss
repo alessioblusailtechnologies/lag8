@@ -17,6 +17,32 @@
   min-width: 0;
 }
 
+.menuBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-left: -6px;
+  margin-right: 2px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: var(--bg-light);
+  }
+
+  svg {
+    display: flex;
+    align-items: center;
+  }
+}
+
 .breadcrumbSeparator {
   color: var(--text-faint);
   font-size: 13px;
@@ -80,5 +106,20 @@
   &:hover {
     background: var(--bg-light);
     color: var(--text);
+  }
+}
+
+@media (max-width: 768px) {
+  .topbar {
+    padding: 0 12px;
+  }
+
+  .menuBtn {
+    display: flex;
+  }
+
+  /* The full date+time string is too wide for small screens */
+  .clock {
+    display: none;
   }
 }

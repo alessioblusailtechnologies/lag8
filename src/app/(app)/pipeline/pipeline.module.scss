@@ -4,6 +4,7 @@
   flex: 1;
   background: var(--bg);
   height: calc(100vh - 48px);
+  height: calc(100dvh - 48px);
   overflow: hidden;
 }
 
@@ -203,4 +204,26 @@
   text-align: center;
   color: var(--text-muted);
   font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 18px 14px 12px;
+    gap: 14px;
+  }
+
+  .title {
+    font-size: 23px;
+  }
+
+  /* Keep the kanban as a horizontally-scrollable board; just tighten columns
+     so the next one peeks in and the swipe affordance is obvious. */
+  .board {
+    gap: 12px;
+  }
+
+  .column {
+    min-width: 82vw;
+    max-width: 82vw;
+  }
 }

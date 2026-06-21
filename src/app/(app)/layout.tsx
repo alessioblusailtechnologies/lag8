@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from '@/components/sidebar/Sidebar';
+import styles from './layout.module.scss';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, hydrated } = useAuth();
@@ -20,7 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Sidebar />
-      <main style={{ marginLeft: 240, flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', minWidth: 0, overflowX: 'hidden' }}>
+      <main className={styles.main}>
         {children}
       </main>
     </>

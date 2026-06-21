@@ -1,6 +1,12 @@
 import { NextRequest } from 'next/server';
 import { mastra } from '@/mastra';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit } from '@/lib/rate-limit';
+
+// Each chat request fans out to up to 3 model calls (titler + router + the
+// streaming CRM/scraper agent with tool steps), so cap how often it can fire.
+const CHAT_RATE_LIMIT = 20; // requests
+const CHAT_RATE_WINDOW_MS = 60_000; // per minute, per user/IP
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -8,6 +14,19 @@ export async function POST(req: NextRequest) {
 
   if (!message?.trim()) {
     return Response.json({ error: 'message is required' }, { status: 400 });
+  }
+
+  // Best-effort throttle keyed by authenticated user, falling back to client IP.
+  const ip =
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown';
+  const limit = rateLimit(`chat:${user_id || ip}`, CHAT_RATE_LIMIT, CHAT_RATE_WINDOW_MS);
+  if (!limit.ok) {
+    return Response.json(
+      { error: `Troppe richieste. Riprova tra ${limit.retryAfter}s.` },
+      { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } },
+    );
   }
 
   let convId = conversation_id;
@@ -56,9 +75,13 @@ export async function POST(req: NextRequest) {
     .eq('conversation_id', convId)
     .order('created_at', { ascending: true });
 
-  const messages = (history || []).map((m) => ({
+  const rawHistory = history || [];
+  const messages = rawHistory.map((m, idx) => ({
     role: m.role as 'user' | 'assistant',
     content: m.content,
+    ...(idx === rawHistory.length - 1
+      ? { providerOptions: { anthropic: { cacheControl: { type: 'ephemeral' } } } }
+      : {}),
   }));
 
   let agentType: string;
@@ -141,7 +164,12 @@ export async function POST(req: NextRequest) {
         send({ type: 'done', conversation_id: convId, title });
         controller.close();
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Errore durante la generazione della risposta';
+        const raw = err instanceof Error ? err.message : '';
+        // Surface upstream rate-limit / overload (429/529) as a friendly message.
+        const isRateOrOverload = /rate.?limit|\b429\b|overloaded|\b529\b/i.test(raw);
+        const errorMsg = isRateOrOverload
+          ? 'Il servizio AI è temporaneamente sovraccarico. Riprova tra qualche secondo.'
+          : raw || 'Errore durante la generazione della risposta';
         let title: string | null = null;
         if (titlerPromise) {
           try {

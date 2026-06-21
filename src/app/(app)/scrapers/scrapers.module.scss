@@ -245,3 +245,28 @@
   color: var(--text-muted);
   font-size: 13px;
 }
+
+@media (max-width: 768px) {
+  .content {
+    padding: 18px 14px;
+    gap: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .primaryBtn {
+    justify-content: center;
+  }
+
+  .title {
+    font-size: 23px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

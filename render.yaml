@@ -1,0 +1,44 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+#
+# Deploy:
+#   1. Push this repo to GitHub.
+#   2. On Render: New > Blueprint, select the repo.
+#   3. Render reads this file and prompts for the secret env vars below
+#      (every var marked `sync: false`). Paste the values from your .env.local.
+#
+# See DEPLOY.md for the full walkthrough (including the Supabase SQL scripts).
+
+services:
+  - type: web
+    name: lag8
+    runtime: node
+    plan: starter # 'free' also works, but it spins down after ~15 min of inactivity
+                  # (cold starts) and large builds can OOM on it. Use starter/standard for production.
+    region: frankfurt # EU. Pick the region closest to your Supabase project to cut latency.
+    branch: main
+    autoDeploy: true
+    # --include=dev forces devDependencies (typescript, @types, eslint-config-next)
+    # to install even if Render sets NODE_ENV=production — they're required by `next build`.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run start # `next start` binds 0.0.0.0 and reads Render's $PORT automatically
+    healthCheckPath: /login # returns 200 (the app root "/" 307-redirects to the login flow)
+    envVars:
+      - key: NODE_VERSION
+        value: 22.12.0
+
+      # --- Supabase ---
+      # NEXT_PUBLIC_* are inlined into the client bundle at BUILD time, so they must
+      # be present when `next build` runs. Render injects env vars into the build too,
+      # so leaving them as sync:false (set in the dashboard) is fine.
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY # server-only secret (bypasses RLS) — never expose client-side
+        sync: false
+
+      # --- AI ---
+      - key: ANTHROPIC_API_KEY # read implicitly by the Mastra/AI SDK agents
+        sync: false
+      - key: TAVILY_API_KEY # web search/extract tools
+        sync: false

@@ -1,0 +1,1 @@
+- [French market pivot](project_french_pivot.md) — full FR pivot, MVP stack: SIRENE + Tavily + Dropcontact, no Italian fallbacks, no Pappers/Kaspr unless asked

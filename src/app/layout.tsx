@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { DM_Sans, Playfair_Display } from 'next/font/google';
 import { AuthProvider } from '@/contexts/AuthContext';
 import './globals.scss';
@@ -16,6 +16,12 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: 'lag8.ai',
   description: 'CRM verticale per procacciatori',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#022b3a',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

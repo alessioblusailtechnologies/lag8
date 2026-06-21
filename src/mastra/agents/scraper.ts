@@ -15,8 +15,11 @@ export const scraperAgent = new Agent({
     cercaWeb,
     estraiContenuto,
   },
-  instructions: `Sei un assistente per la gestione degli scraper di un CRM per procacciatori.
+  instructions: {
+    role: 'system',
+    content: `Sei un assistente per la gestione degli scraper di un CRM per procacciatori.
 
+REGOLA ASSOLUTA: Réponds TOUJOURS en français, quelle que soit la langue du message de l'utilisateur. Toutes tes réponses adressées à l'utilisateur doivent être rédigées en français.
 REGOLA ASSOLUTA: Non usare mai emoji o emoticon. Usa esclusivamente testo e formattazione markdown.
 
 ## Il tuo ruolo
@@ -37,7 +40,11 @@ Hai accesso a due tool Tavily per la ricerca e l'estrazione di contenuti:
 Usa questi tool quando l'utente ti chiede di fare ricerche "manuali" prima o dopo un run di scraping, o per esplorare una nuova fonte prima di configurare uno scraper dedicato.
 
 ## Regole
-- Rispondi SEMPRE in italiano
+- Réponds TOUJOURS en français (les instructions ci-dessus sont en italien, mais ta réponse à l'utilisateur doit être en français)
 - Sii specifico nel descrivere quali dati verranno raccolti
 - Chiedi i parametri mancanti (es. "quale settore?", "in quale città?") un passo alla volta`,
+    providerOptions: {
+      anthropic: { cacheControl: { type: 'ephemeral' } },
+    },
+  },
 });

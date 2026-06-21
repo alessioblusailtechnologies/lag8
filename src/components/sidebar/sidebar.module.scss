@@ -11,6 +11,41 @@
   z-index: 100;
 }
 
+/* Backdrop behind the drawer — only shown on mobile when the drawer is open */
+.overlay {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.26s ease;
+    will-change: transform;
+  }
+
+  .sidebar.mobileOpen {
+    transform: translateX(0);
+    box-shadow: 8px 0 48px rgba(2, 43, 58, 0.45);
+  }
+
+  .overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    background: rgba(2, 43, 58, 0.5);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.26s ease;
+  }
+
+  .overlay.overlayVisible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 .sidebarLogo {
   height: 48px;
   padding: 0 20px;
